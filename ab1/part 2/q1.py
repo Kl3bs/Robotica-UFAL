@@ -25,7 +25,7 @@ def ets_2d(theta):
     print(f"Joints: {robot_2.joints()}")
     print(f"Structure: {robot_2.structure}")
 
-    robot_2.teach(q=(theta))
+    robot_2.teach(q=np.rad2deg(theta))
     
 #ALTERNATIVA A
     

@@ -21,7 +21,7 @@ def htransform_3d():
     plt.show()
 
 
-def ets_3d2():
+def ets_3d2(joint_angle):
     """
     Cria um manipulador espacial do tipo RRRRRR.
     """
@@ -34,10 +34,15 @@ def ets_3d2():
         ET.tz(a_1) * ET.Rz() * ET.Ry() * ET.tz(a_2) * ET.Ry()  * ET.tz(a_3) 
     )
 
-    print(f"Fkine =\n{robot3.fkine(np.deg2rad([30, 40, 50]))}")
+    print(f"Fkine =\n{robot3.fkine(np.deg2rad(joint_angle))}")
     print(f"# Joints: {robot3.n}")
     print(f"Structure: {robot3.structure}")
 
-    robot3.teach(q=np.deg2rad([30, 40, 50]))
-    
-ets_3d2()
+    robot3.teach(q=np.deg2rad(joint_angle))
+
+
+#theta = np.array([0,0,0])
+#theta = np.array([30,45,60])
+#theta = np.array([45,60,75])
+theta = np.array([60,75,90])
+ets_3d2(theta)
