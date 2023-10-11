@@ -1,79 +1,45 @@
-import time
-import numpy as np
 import matplotlib.pyplot as plt
-from roboticstoolbox import ctraj
+import numpy as np
+from roboticstoolbox import ctraj, xplot,  DHRobot, RevoluteDH
 from spatialmath import SE3
-from spatialmath.base import *
-from roboticstoolbox import jsingu, xplot, ET2, DHRobot, RevoluteDH, PrismaticDH
+import time
 
 
-def plots(qs, erro, t):
+def dh_rr():
 
-    plt.plot(erro, t)
-    plt.xlabel('Tempo')
-    plt.ylabel('Erro')
-    plt.legend()
-    plt.title("Erro X Tempo")
-    plt.show()
-    # Extraia as posições de cada junta em listas separadas
-    theta1_positions = [pos[0] for pos in qs]
-    theta2_positions = [pos[1] for pos in qs]
+    link1 = RevoluteDH(a=1)
+    link2 = RevoluteDH(a=1)
 
-    # Crie um gráfico para a junta 1
-    plt.figure(figsize=(10, 6))
-    plt.subplot(2, 1, 1)
-    plt.plot(t, theta1_positions, label='Junta 1')
-    plt.xlabel('Tempo')
-    plt.ylabel('Ângulo da Junta 1 (theta1)')
-    plt.legend()
+    robot_dh = DHRobot([link1, link2], name="RR")
 
-    # Crie um gráfico para a junta 2
-    plt.subplot(2, 1, 2)
-    plt.plot(t, theta2_positions, label='Junta 2')
-    plt.xlabel('Tempo')
-    plt.ylabel('Ângulo da Junta 2 (theta2)')
-    plt.legend()
-
-    # Exiba os gráficos
-    plt.tight_layout()
-    plt.title("Junta x Tempo")
-    plt.show()
+    return robot_dh
 
 
-def rr_robot(L1=1, L2=1):
+def path():
+    rr_robot = dh_rr()
 
-    e1 = RevoluteDH(a=L1)
-    e2 = RevoluteDH(a=L2)
+    q0 = np.array([-np.pi, np.pi/2])
 
-    rob = DHRobot([e1, e2], name='RR')
-    return rob
+    t1 = rr_robot.fkine(q0)
+    print("Initial pose:\n", t1)
 
-
-def trajetoria():
-    rr = rr_robot()
-
-    q0 = np.array([-np.pi / 3, np.pi / 2])
-    # print(q0)
-
-    TE1 = rr.fkine(q0)
-    print("Pose inicial:\n", TE1)
-    TE2 = SE3.Trans(0, -0.5, 0) @ TE1
-    print("Pose final:\n", TE2)
+    t2 = SE3.Trans(0, -0.5, 0) @ t1
+    print("Final pose:\n", t2)
 
     t = np.arange(0, 5, 0.02)
-    # print(t)
+    ts = ctraj(t1, t2, t)
 
-    Ts = ctraj(TE1, TE2, t)
-    # print(Ts)
-    xplot(t, Ts.t, labels="x y z")
-    xplot(t, Ts.rpy("xyz"), labels="roll pitch yaw")
+    xplot(t, ts.t, labels="x y z")
+
+    xplot(t, ts.rpy("xyz"), labels="roll pitch yaw")
+
     plt.show()
-    return Ts
+    return ts
 
 
 def resolved_rate_control_2r(L1=1, L2=1):
-    robot = rr_robot()
-    trajectory = trajetoria()
+    robot = dh_rr()
+    trajectory = path()
     time_steps = np.arange(0, 5, 0.02)
     control_update_time = 0.01
     joint_angle_1 = 0.0
